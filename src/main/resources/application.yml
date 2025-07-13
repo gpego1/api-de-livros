@@ -1,16 +1,14 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/library
-    username: postgres
-    password: admin
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:mysql://localhost:3306/library
+    username: root
+    password: 1234
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
     properties:
       hibernate.format_sql: true
+
 server:
   port: 8081
-
-
