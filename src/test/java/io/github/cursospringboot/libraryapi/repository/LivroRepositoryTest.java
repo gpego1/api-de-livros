@@ -82,8 +82,8 @@ public class LivroRepositoryTest {
     }
     @Test
     public void encontrarPorIsbn(){
-        List<Livro> lista = livroRepository.findByIsbn("47364732-76342781");
-        lista.forEach(System.out::println);
+        Optional<Livro> livro = livroRepository.findByIsbn("47364732-76342781");
+        livro.ifPresent(System.out::println);
     }
     @Test
     public void encontrarPorTituloAndPreco(){

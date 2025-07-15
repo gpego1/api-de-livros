@@ -5,6 +5,7 @@ import io.github.cursospringboot.libraryapi.model.Livro;
 import jakarta.transaction.Transactional;
 import org.springframework.cglib.core.Local;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -26,7 +28,7 @@ public interface LivroRepository extends JpaRepository<Livro, UUID> {
     //Query Method
     List<Livro> findByAutor(Autor autor);
     List<Livro> findByTitulo(String titulo);
-    List<Livro> findByIsbn(String isbn);
+    Optional<Livro> findByIsbn(String isbn);
     List<Livro> findByTituloAndPreco(String titulo, BigDecimal preco);
 
     //select * from livro where titulo = ? or isbn = ?

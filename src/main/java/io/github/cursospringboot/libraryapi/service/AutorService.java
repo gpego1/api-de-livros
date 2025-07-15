@@ -43,21 +43,11 @@ public class AutorService {
         }
          autorRepository.delete(autor);
     }
-    public List<Autor> pesquisa(String nome, String nacionalidade){
-        if(nome != null && nacionalidade != null){
-            return autorRepository.findByNomeAndNacionalidade(nome, nacionalidade);
-        }
-        if(nome != null){
-            return autorRepository.findByNome(nome);
-        }
-        if(nacionalidade != null){
-            return autorRepository.findByNacionalidade(nacionalidade);
-        }
-        return autorRepository.findAll();
-    }
+
     public boolean possuiLivro(Autor autor){
         return livroRepository.existsByAutor(autor);
     }
+
     public List<Autor> pesquisaByExample(String nome, String nacionalidade){
         Autor autor = new Autor();
         autor.setNome(nome);
