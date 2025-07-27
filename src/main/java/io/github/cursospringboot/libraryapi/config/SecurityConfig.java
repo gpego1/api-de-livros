@@ -16,6 +16,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -34,7 +36,7 @@ public class SecurityConfig {
                 //.formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> {
-                    authorize.requestMatchers("/login").permitAll();
+                    authorize.requestMatchers("/login/**").permitAll();
                     authorize.requestMatchers(HttpMethod.POST,"/users/**").permitAll();
 
                     authorize.anyRequest().authenticated();
@@ -44,36 +46,27 @@ public class SecurityConfig {
                             .loginPage("/login")
                             .successHandler(successHandler)
                 )
+                .oauth2ResourceServer(oauth2RS -> oauth2RS.jwt(Customizer.withDefaults()))
+
                 .build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder(10);
-    }
 
-    @Bean
-    public UserDetailsService userDetailsService(UsuarioService usuarioService){
-
-//        UserDetails user1 = User.builder()
-//                .username("usuario")
-//                .password(encoder.encode("1234"))
-//                .roles("USER")
-//                .build();
-//
-//        UserDetails user2 = User.builder()
-//                .username("admin")
-//                .password(encoder.encode("4321"))
-//                .roles("ADMIN")
-//                .build();
-//
-//        return new InMemoryUserDetailsManager(user1, user2);
-
-        return new CustomUserDetailsService(usuarioService);
-    }
-
+    // CONFIGURA O PREFIXO ROLE
     @Bean
     public GrantedAuthorityDefaults grantedAuthorityDefaults(){
         return new GrantedAuthorityDefaults("");
+    }
+
+    // CONFIGURA NO TOKEN JWT, O PREFIXO SCOPE
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter(){
+        var authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        authoritiesConverter.setAuthorityPrefix("");
+
+        var converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+
+        return converter;
     }
 }
