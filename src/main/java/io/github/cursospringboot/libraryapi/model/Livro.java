@@ -4,11 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -23,7 +25,8 @@ import java.util.UUID;
 public class Livro {
 
     @Id
-    @Column(name = "id")
+    @Column(name = "id", columnDefinition = "BINARY(16)")
+    @JdbcTypeCode(Types.BINARY)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
@@ -46,7 +49,8 @@ public class Livro {
     @ManyToOne(
             //cascade = CascadeType.ALL,
             fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_autor")
+    @JoinColumn(name = "id_autor", columnDefinition = "BINARY(16)")
+    @JdbcTypeCode(Types.BINARY)
     private Autor autor;
 
     @CreatedDate
@@ -57,7 +61,8 @@ public class Livro {
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
 
-    @Column(name = "id_usuario")
-    private UUID idUsuario;
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private User usuario;
 
 }

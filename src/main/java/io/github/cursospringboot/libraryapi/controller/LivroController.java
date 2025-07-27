@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -28,6 +29,7 @@ public class LivroController implements GenericController {
     private final LivroService service;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
     public ResponseEntity<List<PesquisaLivroDTO>> pesquisar(
             @RequestParam(value="isbn", required = false) String isbn,
             @RequestParam(value = "titulo", required = false) String titulo,
@@ -44,6 +46,7 @@ public class LivroController implements GenericController {
 
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
     public ResponseEntity<?> salvar(@RequestBody @Valid CadastroLivroDTO dto){
         try {
             Livro livro = mapper.toEntity(dto);
@@ -57,6 +60,7 @@ public class LivroController implements GenericController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
     public ResponseEntity<PesquisaLivroDTO> obterDetalhes(@PathVariable("id") String id){
         return service.obterPorId(UUID.fromString(id))
                 .map(livro -> {
@@ -66,6 +70,7 @@ public class LivroController implements GenericController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
     public ResponseEntity<?> atualizar(@PathVariable("id") String id,@RequestBody @Valid CadastroLivroDTO dto){
         return service.obterPorId(UUID.fromString(id))
                 .map(livro -> {
@@ -84,6 +89,7 @@ public class LivroController implements GenericController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
     public ResponseEntity<?> deletar(@PathVariable("id") String id){
         return service.obterPorId(UUID.fromString(id))
                 .map(livro -> {

@@ -2,7 +2,9 @@ package io.github.cursospringboot.libraryapi.service;
 import io.github.cursospringboot.libraryapi.model.Autor;
 import io.github.cursospringboot.libraryapi.model.GeneroLivro;
 import io.github.cursospringboot.libraryapi.model.Livro;
+import io.github.cursospringboot.libraryapi.model.User;
 import io.github.cursospringboot.libraryapi.repository.LivroRepository;
+import io.github.cursospringboot.libraryapi.security.SecurityService;
 import io.github.cursospringboot.libraryapi.validator.LivroValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
@@ -21,6 +23,7 @@ public class LivroService {
 
     private final LivroRepository repository;
     private final LivroValidator validator;
+    private final SecurityService securityService;
 
     public List<Livro> pesquisa(String isbn, String titulo,  LocalDate dataPublicacao,GeneroLivro genero, Autor autor){
         Livro livro = new Livro();
@@ -39,6 +42,8 @@ public class LivroService {
 
     public Livro salvar(Livro livro) {
         validator.validar(livro);
+        User usuario = securityService.obterUsuarioLogado();
+        livro.setUsuario(usuario);
         return repository.save(livro);
     }
 
