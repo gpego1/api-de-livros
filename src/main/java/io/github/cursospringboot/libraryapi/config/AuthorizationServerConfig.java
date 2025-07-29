@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
@@ -37,15 +38,14 @@ public class AuthorizationServerConfig {
     public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception{
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
                 new OAuth2AuthorizationServerConfigurer();
-
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
 
         http
                 .securityMatcher(endpointsMatcher)
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-                .getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .oidc(Customizer.withDefaults());
+                .with(authorizationServerConfigurer,
+                        configurer -> configurer.oidc(Customizer.withDefaults()));
 
         http
                 .oauth2ResourceServer(oauth2Rs -> oauth2Rs.jwt(Customizer.withDefaults()))
@@ -61,7 +61,10 @@ public class AuthorizationServerConfig {
     public TokenSettings tokenSettings(){
         return TokenSettings.builder()
                 .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+                // Access token: token utilizado nas requisicoes
                 .accessTokenTimeToLive(Duration.ofMinutes(60))
+                // Refresh token: token para renovar o access token
+                .refreshTokenTimeToLive(Duration.ofMinutes(90))
                 .build();
     }
 
@@ -76,7 +79,7 @@ public class AuthorizationServerConfig {
     @Bean
     public JWKSource<SecurityContext> jwkSource() throws Exception{
         RSAKey rsaKey = generateKeyRSA();
-        JWKSet jwkSet = new JWKSet();
+        JWKSet jwkSet = new JWKSet(rsaKey);
         return new ImmutableJWKSet<>(jwkSet);
     }
 
@@ -100,5 +103,25 @@ public class AuthorizationServerConfig {
     @Bean
     public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource){
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+    }
+
+    @Bean
+    public AuthorizationServerSettings authorizationServerSettings(){
+        return AuthorizationServerSettings.builder()
+                // obter o token JWT
+                .tokenEndpoint("/oauth2/token")
+                // usado para consultar status do token
+                .tokenIntrospectionEndpoint("/oauth2/introspect")
+                // revogar token
+                .tokenRevocationEndpoint("/oauth2/revoke")
+                // authorization endpoint
+                .authorizationEndpoint("/oauth2/auhtorize")
+                // informacoes do usuario OPEN ID CONNECT
+                .oidcUserInfoEndpoint("/oauth2/userinfo")
+                // obter a chave publica (verificar assinatura do token)
+                .jwkSetEndpoint("/oauth2/jwks")
+                // logout endpoint
+                .oidcLogoutEndpoint("/oauth2/logout")
+                .build();
     }
 }
